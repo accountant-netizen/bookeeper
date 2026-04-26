@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Inter, Merriweather } from "next/font/google";
 
+// Disable static generation to avoid styled-jsx prerendering issues
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const merriweather = Merriweather({
   subsets: ["latin"],

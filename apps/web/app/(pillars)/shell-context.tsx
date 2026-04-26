@@ -86,68 +86,68 @@ export function ShellProvider({ children }: ProviderProps) {
     return `${token.slice(0, 24)}...${token.slice(-12)}`;
   }, [session]);
 
-  if (!session) {
-    return (
-      <main className="authPage">
-        <section className="authCard">
-          <h1>Accountant Platform</h1>
-          <p>Sign in to continue.</p>
-          <div className="formGrid">
-            <label>
-              Email
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="owner@company.com"
-                type="email"
-              />
-            </label>
-            <label>
-              Password
-              <input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                type="password"
-              />
-            </label>
-          </div>
-          <div className="row">
-            <button onClick={signIn} type="button">
-              Sign In
-            </button>
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  const authorizedFetch = (input: RequestInfo | URL, init?: RequestInit) => {
-    return fetch(input, {
-      ...init,
-      headers: {
-        ...(init?.headers || {}),
-        Authorization: `Bearer ${session.access_token}`
-      }
-    });
-  };
+  // Always provide context, even if not authenticated
+  // Auth check should happen in components that need it
+  const contextValue: ShellContextValue | null = session ? {
+    session,
+    companyId,
+    setCompanyId,
+    status,
+    setStatus,
+    shortToken,
+    authorizedFetch: (input: RequestInfo | URL, init?: RequestInit) => {
+      return fetch(input, {
+        ...init,
+        headers: {
+          ...(init?.headers || {}),
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+    }
+  } : null;
 
   return (
-    <ShellContext.Provider
-      value={{
-        session,
-        companyId,
-        setCompanyId,
-        status,
-        setStatus,
-        shortToken,
-        authorizedFetch
-      }}
-    >
-      {children}
-      <button type="button" className="fab" aria-label="Quick Action">
-        +
-      </button>
+    <ShellContext.Provider value={contextValue}>
+      {!session ? (
+        <main className="authPage">
+          <section className="authCard">
+            <h1>Accountant Platform</h1>
+            <p>Sign in to continue.</p>
+            <div className="formGrid">
+              <label>
+                Email
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="owner@company.com"
+                  type="email"
+                />
+              </label>
+              <label>
+                Password
+                <input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  type="password"
+                />
+              </label>
+            </div>
+            <div className="row">
+              <button onClick={signIn} type="button">
+                Sign In
+              </button>
+            </div>
+          </section>
+        </main>
+      ) : (
+        <>
+          {children}
+          <button type="button" className="fab" aria-label="Quick Action">
+            +
+          </button>
+        </>
+      )}
     </ShellContext.Provider>
   );
 }
@@ -157,6 +157,11 @@ export function useShell() {
   if (!value) {
     throw new Error("useShell must be used within ShellProvider");
   }
+  return value;
+}
+
+export function useShellSafe() {
+  const value = useContext(ShellContext);
   return value;
 }
 

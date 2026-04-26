@@ -5,8 +5,10 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Select from "react-select";
-import { ShellProvider, shellSignOut, useShell } from "./shell-context";
+import { ShellProvider, shellSignOut, useShell, useShellSafe } from "./shell-context";
 import type { Company } from "@accountant/shared-types";
+
+export const dynamic = 'force-dynamic';
 
 type PillarLayoutProps = {
   children: ReactNode;
@@ -14,7 +16,14 @@ type PillarLayoutProps = {
 
 function ShellFrame({ children }: PillarLayoutProps) {
   const pathname = usePathname();
-  const { session, companyId, setCompanyId, authorizedFetch } = useShell();
+  const shell = useShellSafe();
+  
+  // If there's no shell context (e.g., during prerendering), just render children
+  if (!shell) {
+    return <>{children}</>;
+  }
+  
+  const { session, companyId, setCompanyId, authorizedFetch } = shell;
   const [companies, setCompanies] = useState<Company[]>([]);
 
   useEffect(() => {
