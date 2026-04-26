@@ -1,11 +1,10 @@
 import type { NextPage } from 'next';
-import type { AppProps } from 'next/app';
 
 interface ErrorProps {
   statusCode?: number;
 }
 
-const Error: NextPage<ErrorProps> = ({ statusCode }) => {
+const Error: NextPage<ErrorProps> = ({ statusCode }: ErrorProps) => {
   return (
     <div style={{
       display: 'flex',
