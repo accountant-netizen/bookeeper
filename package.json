@@ -8,8 +8,9 @@
   ],
   "scripts": {
     "dev:web": "npm run dev -w web",
-    "dev:mobile": "npm run start -w mobile",
-    "build:web": "npm run build -w web",
-    "typecheck": "npm run typecheck -ws"
+    "build:web": "npm run build -w web"
+  },
+  "devDependencies": {
+    "next": "15.2.5" 
   }
 }
