@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { parseCSV } from "../../../../../../lib/bankParser";
+import { parseCSV } from "@/lib/bankParser";
 import { getAuthUser, requireAuthUser } from "@/lib/auth";
 import { createServerClient } from "@/lib/supabase";
 
