@@ -41,8 +41,13 @@ export default function BankImportsPage() {
       if (j.importId) {
         setImportId(j.importId);
         // fetch preview by re-parsing locally for speed
-        const preview = (await fetch(`/api/banking/statements/preview`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: fileContent }) } ))
-          .then(r=>r.json()).catch(()=>({ parsed: [] }));
+        const res = await fetch(`/api/banking/statements/preview`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: fileContent }),
+        });
+
+        const preview = await res.json().catch(() => ({ parsed: [] }));
         setParsed(preview.parsed || []);
       } else if (j.parsed) {
         setParsed(j.parsed || []);
