@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-            {connectors.length > 0 ? connectors.map((connector) => (
 
 type Connector = {
   id: string;
@@ -30,7 +29,7 @@ export default function ConnectorsPage() {
   const { companyId, authorizedFetch } = useShell();
   const [connectors, setConnectors] = useState<Connector[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
-            )) : !loading ? <TableEmptyState description="Add a connector to start syncing integrations." /> : null}
+    page: 1,
     pageSize: 10,
     total: 0,
     totalPages: 0,
