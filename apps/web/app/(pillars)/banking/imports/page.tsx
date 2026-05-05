@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { TableEmptyState } from "../../table-empty-state";
 
 export default function BankImportsPage() {
   const [fileContent, setFileContent] = useState("");
