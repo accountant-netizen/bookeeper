@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { TableEmptyState } from "../../table-empty-state";
 
 type ConnectorSyncJob = {
   id: string;
