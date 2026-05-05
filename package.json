@@ -1,0 +1,16 @@
+{
+  "name": "accountant",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w web",
+    "dev:mobile": "npm run start -w mobile",
+    "build:web": "npm run build -w web",
+    "typecheck": "npm run typecheck -ws",
+    "test:smoke": "node ./scripts/smoke-tests.js"
+  }
+}
