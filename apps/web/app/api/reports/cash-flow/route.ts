@@ -70,7 +70,9 @@ export async function GET(request: NextRequest) {
       return { inflows, outflows };
     }
 
-    const opening = await sumLinesUpTo(new Date(new Date(startDate).getTime() - 86400000).toISOString().split("T")[0]);
+    const opening = await sumLinesUpTo(
+      new Date(new Date(startDate).getTime() - 86400000).toISOString().slice(0, 10)
+    );
     const closing = await sumLinesUpTo(endDate);
     const { inflows, outflows } = await sumInPeriod(startDate, endDate);
 
