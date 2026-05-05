@@ -63,7 +63,12 @@ export async function GET(request: NextRequest) {
       sum.credit += Number(l.credit || 0);
     }
 
-    const grouped: Record<string, Array<any>> = {
+    const grouped: {
+      assets: Array<any>;
+      liabilities: Array<any>;
+      equity: Array<any>;
+      other: Array<any>;
+    } = {
       assets: [],
       liabilities: [],
       equity: [],
