@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-            {connectors.length > 0 ? connectors.map((connector) => (
+import { useShell } from "../../shell-context";
 
 type Connector = {
   id: string;
@@ -30,7 +30,7 @@ export default function ConnectorsPage() {
   const { companyId, authorizedFetch } = useShell();
   const [connectors, setConnectors] = useState<Connector[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
-            )) : !loading ? <TableEmptyState description="Add a connector to start syncing integrations." /> : null}
+    page: 1,
     pageSize: 10,
     total: 0,
     totalPages: 0,
@@ -298,6 +298,206 @@ export default function ConnectorsPage() {
         </div>
         <div>
           <label>Search:</label>
+          <input
+            type="text"
+            value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            placeholder="Search connectors..."
+          />
+        </div>
+        <button onClick={() => setShowForm(true)}>Add Connector</button>
+        {selectedIds.size > 0 && (
+          <>
+            <button onClick={bulkDelete} style={{ background: "red", color: "white" }}>
+              Delete Selected ({selectedIds.size})
+            </button>
+            <select onChange={(e) => e.target.value && bulkStatusUpdate(e.target.value)}>
+              <option value="">Bulk Status Update</option>
+              <option value="active">Set Active</option>
+              <option value="inactive">Set Inactive</option>
+            </select>
+          </>
+        )}
+        <button onClick={() => exportConnectors("json")}>Export JSON</button>
+        <button onClick={() => exportConnectors("csv")}>Export CSV</button>
+      </div>
+
+      {/* Table */}
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr style={{ background: "#f0f0f0" }}>
+            <th style={{ padding: 8, textAlign: "left" }}>
+              <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} />
+            </th>
+            <th style={{ padding: 8, textAlign: "left" }}>Provider</th>
+            <th style={{ padding: 8, textAlign: "left" }}>Name</th>
+            <th style={{ padding: 8, textAlign: "left" }}>Status</th>
+            <th style={{ padding: 8, textAlign: "left" }}>Created</th>
+            <th style={{ padding: 8, textAlign: "left" }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {connectors.length > 0 ? (
+            connectors.map((connector) => (
+              <tr key={connector.id} style={{ borderBottom: "1px solid #ddd" }}>
+                <td style={{ padding: 8 }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(connector.id)}
+                    onChange={() => toggleSelect(connector.id)}
+                  />
+                </td>
+                <td style={{ padding: 8 }}>{connector.provider}</td>
+                <td style={{ padding: 8 }}>{connector.name}</td>
+                <td style={{ padding: 8 }}>
+                  <span
+                    style={{
+                      padding: "4px 8px",
+                      borderRadius: 4,
+                      background: connector.status === "active" ? "green" : "gray",
+                      color: "white",
+                    }}
+                  >
+                    {connector.status}
+                  </span>
+                </td>
+                <td style={{ padding: 8 }}>{new Date(connector.created_at).toLocaleDateString()}</td>
+                <td style={{ padding: 8 }}>
+                  <button
+                    onClick={() => {
+                      setSelected(connector);
+                      setFormData({
+                        provider: connector.provider,
+                        name: connector.name,
+                        settings: JSON.stringify(connector.settings, null, 2),
+                      });
+                      setFormMode("edit");
+                      setShowForm(true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button onClick={() => testConnector(connector.id)} disabled={testLoading}>
+                    Test
+                  </button>
+                  <button
+                    onClick={() => deleteConnector(connector.id)}
+                    style={{ background: "red", color: "white", marginLeft: 8 }}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : !loading ? (
+            <tr>
+              <td colSpan={6} style={{ padding: 24, textAlign: "center" }}>
+                No connectors found. <button onClick={() => setShowForm(true)}>Add one</button>
+              </td>
+            </tr>
+          ) : null}
+        </tbody>
+      </table>
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div style={{ marginTop: 24, display: "flex", justifyContent: "center", gap: 8 }}>
+          <button
+            disabled={pagination.page <= 1}
+            onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
+          >
+            Previous
+          </button>
+          <span>
+            Page {pagination.page} of {pagination.totalPages}
+          </span>
+          <button
+            disabled={pagination.page >= pagination.totalPages}
+            onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* Form Modal */}
+      {showForm && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div style={{ background: "white", padding: 24, borderRadius: 8, width: 400 }}>
+            <h2>{formMode === "create" ? "Create Connector" : "Edit Connector"}</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (formMode === "create") createConnector();
+                else updateConnector();
+              }}
+            >
+              <div style={{ marginBottom: 12 }}>
+                <label>Provider:</label>
+                <select
+                  value={formData.provider}
+                  onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
+                  required
+                >
+                  <option value="">Select Provider</option>
+                  {SUPPORTED_PROVIDERS.map((p) => (
+                    <option key={p.value} value={p.value}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label>Name:</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label>Settings (JSON):</label>
+                <textarea
+                  value={formData.settings}
+                  onChange={(e) => setFormData({ ...formData, settings: e.target.value })}
+                  rows={6}
+                  placeholder='{"apiKey": "your-key"}'
+                />
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button type="submit">{formMode === "create" ? "Create" : "Update"}</button>
+                <button type="button" onClick={() => setShowForm(false)}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Test Result */}
+      {testResult && (
+        <div style={{ marginTop: 24, padding: 12, background: testResult.success ? "lightgreen" : "lightcoral" }}>
+          <h3>Test Result</h3>
+          <pre>{JSON.stringify(testResult, null, 2)}</pre>
+        </div>
+      )}
+    </div>
+  );
+}
           <input
             type="text"
             placeholder="Connector name..."
