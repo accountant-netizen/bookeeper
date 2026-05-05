@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ processed: 0, message: "No queued jobs" });
     }
 
-    const job = jobs[0];
+    const job = jobs?.[0];
 
     if (!job) {
       return NextResponse.json(

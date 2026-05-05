@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       .select("id, entry_date")
       .eq("company_id", companyId)
       .eq("status", "posted")
-      .lte("entry_date", asOfDate.toISOString().split("T")[0]);
+      .lte("entry_date", asOfDate.toISOString().slice(0, 10));
 
     if (branchId) entriesQuery = entriesQuery.eq("branch_id", branchId);
 
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       companyId,
       branchId: branchId || null,
-      asOf: asOfDate.toISOString().split("T")[0],
+      asOf: asOfDate.toISOString().slice(0, 10),
       generatedAt: new Date().toISOString(),
       assets: grouped.assets,
       liabilities: grouped.liabilities,

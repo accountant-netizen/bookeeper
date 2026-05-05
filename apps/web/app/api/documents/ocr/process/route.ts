@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       .order("created_at", { ascending: true })
       .limit(1);
 
-    const job = jobs && jobs[0];
+    const job = jobs?.[0];
     if (!job) return NextResponse.json({ processed: 0, message: "No queued jobs" });
 
     // mark running

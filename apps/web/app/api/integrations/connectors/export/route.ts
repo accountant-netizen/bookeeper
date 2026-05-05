@@ -45,7 +45,7 @@ export async function GET(req: Request) {
       return new NextResponse(csv, {
         headers: {
           "Content-Type": "text/csv",
-          "Content-Disposition": `attachment; filename="connectors_${new Date().toISOString().split("T")[0]}.csv"`,
+          "Content-Disposition": `attachment; filename="connectors_${new Date().toISOString().slice(0, 10)}.csv"`,
         },
       });
     } else {
@@ -59,7 +59,7 @@ export async function GET(req: Request) {
       return new NextResponse(json, {
         headers: {
           "Content-Type": "application/json",
-          "Content-Disposition": `attachment; filename="connectors_${new Date().toISOString().split("T")[0]}.json"`,
+          "Content-Disposition": `attachment; filename="connectors_${new Date().toISOString().slice(0, 10)}.json"`,
         },
       });
     }

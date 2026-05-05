@@ -64,7 +64,7 @@ Deductions: ${emp.deductions.toFixed(2)}
     success: true,
     format: "BIR 1604-E",
     content,
-    filename: `BIR_1604E_${data.periodStart.toISOString().split("T")[0]}.txt`,
+    filename: `BIR_1604E_${data.periodStart.toISOString().slice(0, 10)}.txt`,
     mimeType: "text/plain",
   };
 }
@@ -139,7 +139,7 @@ Income Tax: £${emp.taxWithheld.toFixed(2)}
     success: true,
     format: "HMRC P30B",
     content,
-    filename: `HMRC_P30B_${data.periodStart.toISOString().split("T")[0]}.txt`,
+    filename: `HMRC_P30B_${data.periodStart.toISOString().slice(0, 10)}.txt`,
     mimeType: "text/plain",
   };
 }
@@ -175,7 +175,7 @@ Tax Withheld: A$${emp.taxWithheld.toFixed(2)}
     success: true,
     format: "ATO ETP",
     content,
-    filename: `ATO_ETP_${data.periodStart.toISOString().split("T")[0]}.txt`,
+    filename: `ATO_ETP_${data.periodStart.toISOString().slice(0, 10)}.txt`,
     mimeType: "text/plain",
   };
 }

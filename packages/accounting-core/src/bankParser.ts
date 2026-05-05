@@ -17,7 +17,7 @@ export function parseCSV(content: string): StatementLine[] {
   if (lines.length === 0) return [];
 
   // detect header
-  const header = lines[0].toLowerCase();
+  const header = lines[0]?.toLowerCase() ?? '';
   let start = 0;
   if (header.includes('date') && header.includes('amount')) start = 1;
 
@@ -88,6 +88,7 @@ export function parseOFX(content: string): StatementLine[] {
   const lines = content.split(/\r?\n/);
   let cur: any = {};
   for (const line of lines) {
+    if (!line) continue;
     const l = line.trim();
     const tagMatch = l.match(/^<([A-Z]+)>(.*)$/i);
     if (tagMatch) {
@@ -121,6 +122,7 @@ export function parseMT940(content: string): StatementLine[] {
   const lines = content.split(/\r?\n/);
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    if (!line) continue;
     if (line.startsWith(':61:')) {
       const rest = line.substring(4).trim();
       // date is first 6 digits

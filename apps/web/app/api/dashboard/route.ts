@@ -12,14 +12,14 @@ export async function GET(request: NextRequest) {
     const supabase = createServerClient();
 
     // Get today's date
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().slice(0, 10);
     const monthStart = new Date();
     monthStart.setDate(1);
-    const monthStartStr = monthStart.toISOString().split("T")[0];
+    const monthStartStr = monthStart.toISOString().slice(0, 10);
 
     const yearStart = new Date();
     yearStart.setMonth(0, 1);
-    const yearStartStr = yearStart.toISOString().split("T")[0];
+    const yearStartStr = yearStart.toISOString().slice(0, 10);
 
     // Query sales (AR) for today, month, year
     // Sales are CR to Sales account; we sum credit amounts for today
