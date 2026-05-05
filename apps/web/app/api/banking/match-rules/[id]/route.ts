@@ -12,7 +12,7 @@ type RouteContext = {
 // PUT
 export async function PUT(
   req: NextRequest,
-  context: RouteContext
+  context: any
 ) {
   try {
     const authUser = await getAuthUser(req.headers.get("authorization"));
@@ -53,7 +53,7 @@ export async function PUT(
 // DELETE
 export async function DELETE(
   req: NextRequest,
-  context: RouteContext
+  context: any
 ) {
   try {
     const authUser = await getAuthUser(req.headers.get("authorization"));
