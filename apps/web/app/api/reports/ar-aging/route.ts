@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
         bucket
       };
     })
-      .filter((item) => Number.parseFloat(item.amount) > 0);
+      .filter((item: ArAgingItem) => Number.parseFloat(item.amount) > 0);
 
     const bucketTotals: ArAgingBucketTotals = {
       bucket_0_30: totals.bucket_0_30.toFixed(2),
