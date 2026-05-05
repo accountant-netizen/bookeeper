@@ -48,6 +48,8 @@ export function parseCSV(content: string): StatementLine[] {
     if (typeof amt === 'undefined') {
       // try last column as amount
       const last = parts[parts.length - 1];
+      if (!last) continue;
+
       const n = Number(last.replace(/[^0-9.-]/g, ''));
       if (!Number.isNaN(n)) amt = n;
     }
@@ -79,7 +81,7 @@ export function parseOFX(content: string): StatementLine[] {
       const amtRaw = (m.match(/<TRNAMT>([^<\s]+)/i) || [])[1];
       const name = (m.match(/<NAME>([^<\n]+)/i) || [])[1] || (m.match(/<MEMO>([^<\n]+)/i) || [])[1] || '';
       const date = dt ? formatOfxDate(dt) : undefined;
-      const amount = amtRaw ? Number(String(amtRaw).replace(/[^0-9.-]/g, '')) : 0;
+      const amount = amtRaw ? Number(String(amtRaw).replace(/[^0-9.-]/g, '')) : undefined;
       out.push({ txn_date: date, description: (name || '').trim(), amount });
     }
     return out;
@@ -87,7 +89,11 @@ export function parseOFX(content: string): StatementLine[] {
 
   // Fallback: try line-based scan for tags
   const lines = content.split(/\r?\n/);
-  let cur: any = {};
+  let cur: {
+    dt?: string;
+    amt?: string;
+    desc?: string;
+  } = {};
   for (const line of lines) {
     if (!line) continue;
     const l = line.trim();
@@ -163,7 +169,12 @@ export function matchCandidates(line: StatementLine, candidates: Array<{id: stri
     let score = 0;
     if (Math.abs(c.amount - line.amount) < 0.01) score += 0.6;
     const desc = (c.description || '').toLowerCase();
-    if (desc && text && desc.includes(text) || text.includes(desc)) score += 0.4;
+    if (
+      (desc && text && desc.includes(text)) ||
+      (desc && text && text.includes(desc))
+    ) {
+      score += 0.4;
+    }
     if (score > 0) matches.push({ id: c.id, score });
   }
   matches.sort((a,b) => b.score - a.score);
