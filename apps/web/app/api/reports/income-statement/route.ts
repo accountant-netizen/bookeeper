@@ -65,9 +65,10 @@ export async function GET(request: NextRequest) {
     }
 
     for (const l of lines || []) {
-      if (!sumsByAccount[l.account_id]) continue;
-      sumsByAccount[l.account_id].debit += Number(l.debit || 0);
-      sumsByAccount[l.account_id].credit += Number(l.credit || 0);
+      const sum = sumsByAccount[l.account_id];
+      if (!sum) continue;
+      sum.debit += Number(l.debit || 0);
+      sum.credit += Number(l.credit || 0);
     }
 
     for (const a of accounts || []) {
