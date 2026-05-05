@@ -81,41 +81,53 @@ export function parseOFX(content: string): StatementLine[] {
       const amtRaw = (m.match(/<TRNAMT>([^<\s]+)/i) || [])[1];
       const name = (m.match(/<NAME>([^<\n]+)/i) || [])[1] || (m.match(/<MEMO>([^<\n]+)/i) || [])[1] || '';
       const date = dt ? formatOfxDate(dt) : undefined;
-      if (!amtRaw) continue;
-
-      const amount = Number(String(amtRaw).replace(/[^0-9.-]/g, ''));
-
-      if (Number.isNaN(amount)) continue;
+      const amount = amtRaw ? Number(String(amtRaw).replace(/[^0-9.-]/g, '')) : 0;
       out.push({ txn_date: date, description: (name || '').trim(), amount });
     }
     return out;
   }
 
-  // Fallback: try line-based scan for tags
   const lines = content.split(/\r?\n/);
+
   let cur: {
     dt?: string;
     amt?: string;
     desc?: string;
   } = {};
+
   for (const line of lines) {
     if (!line) continue;
+
     const l = line.trim();
     const tagMatch = l.match(/^<([A-Z]+)>(.*)$/i);
-    if (tagMatch) {
-      const tag = tagMatch[1].toUpperCase();
-      const val = tagMatch[2].trim();
-      if (tag === 'STMTTRN') { cur = {}; }
-      if (tag === 'DTPOSTED') cur.dt = val;
-      if (tag === 'TRNAMT') cur.amt = val;
-      if (tag === 'NAME' || tag === 'MEMO') cur.desc = (cur.desc ? cur.desc + ' ' : '') + val;
-      if (tag === '/STMTTRN' || tag === 'STMTTRN') {
-        if (cur.amt) {
-          out.push({ txn_date: cur.dt ? formatOfxDate(cur.dt) : undefined, description: cur.desc || '', amount: Number(String(cur.amt).replace(/[^0-9.-]/g, '')) });
-        }
+
+    if (!tagMatch || !tagMatch[1]) continue;
+
+    const tag = tagMatch[1].toUpperCase();
+    const val = tagMatch[2]?.trim() ?? "";
+
+    if (tag === "STMTTRN") {
+      cur = {};
+    }
+
+    if (tag === "DTPOSTED") cur.dt = val;
+    if (tag === "TRNAMT") cur.amt = val;
+
+    if (tag === "NAME" || tag === "MEMO") {
+      cur.desc = (cur.desc ? cur.desc + " " : "") + val;
+    }
+
+    if (tag === "/STMTTRN" || tag === "STMTTRN") {
+      if (cur.amt) {
+        out.push({
+          txn_date: cur.dt ? formatOfxDate(cur.dt) : undefined,
+          description: cur.desc || "",
+          amount: Number(String(cur.amt).replace(/[^0-9.-]/g, "")),
+        });
       }
     }
   }
+
   return out;
 }
 
@@ -131,37 +143,51 @@ function formatOfxDate(dt: string) {
 export function parseMT940(content: string): StatementLine[] {
   const out: StatementLine[] = [];
   const lines = content.split(/\r?\n/);
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line) continue;
-    if (line.startsWith(':61:')) {
+
+    if (line.startsWith(":61:")) {
       const rest = line.substring(4).trim();
-      // date is first 6 digits
+
       const dateMatch = rest.match(/^(\d{6})/);
-      const yyMMdd = dateMatch ? dateMatch[1] : undefined;
-      let year = '20' + (yyMMdd ? yyMMdd.substring(0, 2) : '00');
-      const month = yyMMdd ? yyMMdd.substring(2, 4) : '01';
-      const day = yyMMdd ? yyMMdd.substring(4, 6) : '01';
+      const yyMMdd = dateMatch?.[1];
+
+      const year = "20" + (yyMMdd ? yyMMdd.substring(0, 2) : "00");
+      const month = yyMMdd ? yyMMdd.substring(2, 4) : "01";
+      const day = yyMMdd ? yyMMdd.substring(4, 6) : "01";
       const txnDate = `${year}-${month}-${day}`;
 
-      // amount: look for C or D followed by number
-      const amtMatch = rest.match(/([CD])([0-9,\.]+)/);
+      const amtMatch = rest.match(/([CD])([0-9.,]+)/);
+
       let amount = 0;
-      if (amtMatch) {
+
+      if (amtMatch?.[1] && amtMatch?.[2]) {
         const sign = amtMatch[1];
-        const num = amtMatch[2].replace(/,/g, '.');
-        amount = Number(num) * (sign === 'D' ? -1 : 1);
+        const num = Number(amtMatch[2].replace(/,/g, "."));
+        if (!Number.isNaN(num)) {
+          amount = num * (sign === "D" ? -1 : 1);
+        }
       }
 
-      // description often in :86: next line(s)
-      let desc = '';
-      if (i + 1 < lines.length && lines[i + 1].startsWith(':86:')) {
-        desc = lines[i + 1].substring(4).trim();
+      let desc = "";
+
+      if (i + 1 < lines.length) {
+        const next = lines[i + 1];
+        if (next?.startsWith(":86:")) {
+          desc = next.substring(4).trim();
+        }
       }
 
-      out.push({ txn_date: txnDate, description: desc, amount });
+      out.push({
+        txn_date: txnDate,
+        description: desc,
+        amount,
+      });
     }
   }
+
   return out;
 }
 
