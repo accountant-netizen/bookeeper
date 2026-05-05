@@ -24,6 +24,7 @@ export function parseCSV(content: string): StatementLine[] {
   const out: StatementLine[] = [];
   for (let i = start; i < lines.length; i++) {
     const row = lines[i];
+    if (!row) continue;
     // naive CSV split (works for common simple exports)
     const parts = row.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(unquote);
     // heuristics: find date, amount, description
