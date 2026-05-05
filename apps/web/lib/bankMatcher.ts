@@ -1,4 +1,4 @@
-import type { StatementLine } from "./bankParser";
+import type { StatementLine } from "@accountant/accounting-core";
 import { createServerClient } from "./supabase";
 
 type MatchRule = {

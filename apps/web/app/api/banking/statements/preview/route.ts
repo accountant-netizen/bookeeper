@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { detectFormat, parseCSV, parseOFX, parseMT940 } from "../../../../../../lib/bankParser";
+import { detectFormat, parseCSV, parseOFX, parseMT940 } from "@accountant/accounting-core";
 
 export async function POST(req: NextRequest) {
   try {

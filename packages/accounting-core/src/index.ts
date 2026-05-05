@@ -11,6 +11,10 @@ export const invariant = {
 // Re-export types from shared-types for convenience
 export type { PostJournalEntryRequest, PostJournalEntryResponse, JournalLineInput } from "@accountant/shared-types";
 
+// Re-export bank parsing utilities
+export type { StatementLine } from "./bankParser";
+export { parseCSV, detectFormat, parseOFX, parseMT940, matchCandidates } from "./bankParser";
+
 // Posting validation logic
 export function validatePostingRequest(request: {
   lines: Array<{ debit: string; credit: string }>;
