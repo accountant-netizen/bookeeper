@@ -81,7 +81,11 @@ export function parseOFX(content: string): StatementLine[] {
       const amtRaw = (m.match(/<TRNAMT>([^<\s]+)/i) || [])[1];
       const name = (m.match(/<NAME>([^<\n]+)/i) || [])[1] || (m.match(/<MEMO>([^<\n]+)/i) || [])[1] || '';
       const date = dt ? formatOfxDate(dt) : undefined;
-      const amount = amtRaw ? Number(String(amtRaw).replace(/[^0-9.-]/g, '')) : undefined;
+      if (!amtRaw) continue;
+
+      const amount = Number(String(amtRaw).replace(/[^0-9.-]/g, ''));
+
+      if (Number.isNaN(amount)) continue;
       out.push({ txn_date: date, description: (name || '').trim(), amount });
     }
     return out;
