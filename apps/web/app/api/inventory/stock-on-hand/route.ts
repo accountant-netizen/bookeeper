@@ -22,10 +22,19 @@ export async function GET(request: NextRequest) {
     for (const p of products || []) map[p.id] = 0;
 
     for (const m of movements || []) {
-      if (!map.hasOwnProperty(m.product_id)) continue;
-      const q = Number(m.quantity || 0);
-      if ((m.movement_type || "").toLowerCase() === "in") map[m.product_id] += q;
-      else map[m.product_id] -= q;
+      const key = m.product_id;
+      if (!key) continue;
+
+      const q = Number(m.quantity ?? 0);
+      const type = (m.movement_type ?? "").toLowerCase();
+
+      map[key] = map[key] ?? 0;
+
+      if (type === "in") {
+        map[key] += q;
+      } else {
+        map[key] -= q;
+      }
     }
 
     const items = (products || []).map((p: any) => ({ productId: p.id, code: p.code, name: p.name, onHand: (map[p.id] || 0).toFixed(4) }));
