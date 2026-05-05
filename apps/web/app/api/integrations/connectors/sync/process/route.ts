@@ -27,6 +27,14 @@ export async function POST(req: Request) {
     }
 
     const job = jobs[0];
+
+    if (!job) {
+      return NextResponse.json(
+        { error: "Job not found" },
+        { status: 404 }
+      );
+    }
+
     const payload = (job.payload as any) || {};
 
     // mark running
