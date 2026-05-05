@@ -5,7 +5,7 @@ import { runMatchForImport } from "@/lib/bankMatcher";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { importId: string } }
+  context: any
 ) {
   try {
     const authUser = await getAuthUser(
@@ -13,7 +13,8 @@ export async function POST(
     );
     const user = requireAuthUser(authUser);
 
-    const importId = params.importId;
+    const importId = context.params.importId;
+
     if (!importId) {
       return NextResponse.json(
         { error: "Missing importId" },
